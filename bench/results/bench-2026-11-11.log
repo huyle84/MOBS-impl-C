@@ -1,0 +1,361 @@
+### mode=2 run=1 17:47:29
+# MOBS[ML-DSA] benchmark: ML-DSA mode 2, Ligero K=2^14, rate 1/4, t=428 (column bound 2^-128.2), sI=3 sL=2 sQ=2
+| step | time |
+|---|---|
+| KeyGen | 0.087 ms |
+| User1 (commit, n=8) | 0.002 ms |
+| Sign (FIPS 204) | 0.386 ms |
+| User2 (verify) | 0.087 ms |
+
+| n | Keccak-f perms | mults | free wires | linear constr. | rows | opening size | open (build+prove) | verify (build+check) |
+|---|---|---|---|---|---|---|---|---|
+| 8 | 12 | 1992807 | 478596 | 580486 | 416 | 2.96 MiB | 0.66 + 12.61 s | 0.52 + 7.18 s |
+### mode=2 run=2 17:47:50
+# MOBS[ML-DSA] benchmark: ML-DSA mode 2, Ligero K=2^14, rate 1/4, t=428 (column bound 2^-128.2), sI=3 sL=2 sQ=2
+| step | time |
+|---|---|
+| KeyGen | 0.080 ms |
+| User1 (commit, n=8) | 0.002 ms |
+| Sign (FIPS 204) | 0.347 ms |
+| User2 (verify) | 0.087 ms |
+
+| n | Keccak-f perms | mults | free wires | linear constr. | rows | opening size | open (build+prove) | verify (build+check) |
+|---|---|---|---|---|---|---|---|---|
+| 8 | 12 | 1992807 | 478596 | 580486 | 416 | 2.96 MiB | 0.55 + 12.73 s | 0.53 + 7.31 s |
+### mode=2 run=3 17:48:12
+# MOBS[ML-DSA] benchmark: ML-DSA mode 2, Ligero K=2^14, rate 1/4, t=428 (column bound 2^-128.2), sI=3 sL=2 sQ=2
+| step | time |
+|---|---|
+| KeyGen | 0.086 ms |
+| User1 (commit, n=8) | 0.002 ms |
+| Sign (FIPS 204) | 0.352 ms |
+| User2 (verify) | 0.089 ms |
+
+| n | Keccak-f perms | mults | free wires | linear constr. | rows | opening size | open (build+prove) | verify (build+check) |
+|---|---|---|---|---|---|---|---|---|
+| 8 | 12 | 1992807 | 478596 | 580486 | 416 | 2.96 MiB | 0.58 + 12.66 s | 0.50 + 6.95 s |
+### mode=2 run=4 17:48:33
+# MOBS[ML-DSA] benchmark: ML-DSA mode 2, Ligero K=2^14, rate 1/4, t=428 (column bound 2^-128.2), sI=3 sL=2 sQ=2
+| step | time |
+|---|---|
+| KeyGen | 0.080 ms |
+| User1 (commit, n=8) | 0.002 ms |
+| Sign (FIPS 204) | 0.341 ms |
+| User2 (verify) | 0.089 ms |
+
+| n | Keccak-f perms | mults | free wires | linear constr. | rows | opening size | open (build+prove) | verify (build+check) |
+|---|---|---|---|---|---|---|---|---|
+| 8 | 12 | 1992807 | 478596 | 580486 | 416 | 2.96 MiB | 0.59 + 12.31 s | 0.50 + 6.94 s |
+### mode=2 run=5 17:48:53
+# MOBS[ML-DSA] benchmark: ML-DSA mode 2, Ligero K=2^14, rate 1/4, t=428 (column bound 2^-128.2), sI=3 sL=2 sQ=2
+| step | time |
+|---|---|
+| KeyGen | 0.082 ms |
+| User1 (commit, n=8) | 0.002 ms |
+| Sign (FIPS 204) | 0.324 ms |
+| User2 (verify) | 0.086 ms |
+
+| n | Keccak-f perms | mults | free wires | linear constr. | rows | opening size | open (build+prove) | verify (build+check) |
+|---|---|---|---|---|---|---|---|---|
+| 8 | 12 | 1992807 | 478596 | 580486 | 416 | 2.96 MiB | 0.54 + 12.35 s | 0.47 + 6.94 s |
+### mode=2 run=6 17:49:14
+# MOBS[ML-DSA] benchmark: ML-DSA mode 2, Ligero K=2^14, rate 1/4, t=428 (column bound 2^-128.2), sI=3 sL=2 sQ=2
+| step | time |
+|---|---|
+| KeyGen | 0.102 ms |
+| User1 (commit, n=8) | 0.002 ms |
+| Sign (FIPS 204) | 0.321 ms |
+| User2 (verify) | 0.085 ms |
+
+| n | Keccak-f perms | mults | free wires | linear constr. | rows | opening size | open (build+prove) | verify (build+check) |
+|---|---|---|---|---|---|---|---|---|
+| 8 | 12 | 1992807 | 478596 | 580486 | 416 | 2.96 MiB | 0.59 + 12.58 s | 0.52 + 7.24 s |
+### mode=2 run=7 17:49:35
+# MOBS[ML-DSA] benchmark: ML-DSA mode 2, Ligero K=2^14, rate 1/4, t=428 (column bound 2^-128.2), sI=3 sL=2 sQ=2
+| step | time |
+|---|---|
+| KeyGen | 0.082 ms |
+| User1 (commit, n=8) | 0.002 ms |
+| Sign (FIPS 204) | 0.319 ms |
+| User2 (verify) | 0.091 ms |
+
+| n | Keccak-f perms | mults | free wires | linear constr. | rows | opening size | open (build+prove) | verify (build+check) |
+|---|---|---|---|---|---|---|---|---|
+| 8 | 12 | 1992807 | 478596 | 580486 | 416 | 2.96 MiB | 0.53 + 12.47 s | 0.56 + 7.31 s |
+### mode=2 run=8 17:49:56
+# MOBS[ML-DSA] benchmark: ML-DSA mode 2, Ligero K=2^14, rate 1/4, t=428 (column bound 2^-128.2), sI=3 sL=2 sQ=2
+| step | time |
+|---|---|
+| KeyGen | 0.085 ms |
+| User1 (commit, n=8) | 0.002 ms |
+| Sign (FIPS 204) | 0.394 ms |
+| User2 (verify) | 0.085 ms |
+
+| n | Keccak-f perms | mults | free wires | linear constr. | rows | opening size | open (build+prove) | verify (build+check) |
+|---|---|---|---|---|---|---|---|---|
+| 8 | 12 | 1992807 | 478596 | 580486 | 416 | 2.96 MiB | 0.55 + 12.66 s | 0.51 + 7.08 s |
+### mode=2 run=9 17:50:17
+# MOBS[ML-DSA] benchmark: ML-DSA mode 2, Ligero K=2^14, rate 1/4, t=428 (column bound 2^-128.2), sI=3 sL=2 sQ=2
+| step | time |
+|---|---|
+| KeyGen | 0.081 ms |
+| User1 (commit, n=8) | 0.002 ms |
+| Sign (FIPS 204) | 0.346 ms |
+| User2 (verify) | 0.086 ms |
+
+| n | Keccak-f perms | mults | free wires | linear constr. | rows | opening size | open (build+prove) | verify (build+check) |
+|---|---|---|---|---|---|---|---|---|
+| 8 | 12 | 1992807 | 478596 | 580486 | 416 | 2.96 MiB | 0.57 + 12.27 s | 0.56 + 7.19 s |
+### mode=2 run=10 17:50:37
+# MOBS[ML-DSA] benchmark: ML-DSA mode 2, Ligero K=2^14, rate 1/4, t=428 (column bound 2^-128.2), sI=3 sL=2 sQ=2
+| step | time |
+|---|---|
+| KeyGen | 0.083 ms |
+| User1 (commit, n=8) | 0.002 ms |
+| Sign (FIPS 204) | 0.322 ms |
+| User2 (verify) | 0.089 ms |
+
+| n | Keccak-f perms | mults | free wires | linear constr. | rows | opening size | open (build+prove) | verify (build+check) |
+|---|---|---|---|---|---|---|---|---|
+| 8 | 12 | 1992807 | 478596 | 580486 | 416 | 2.96 MiB | 0.55 + 12.27 s | 0.50 + 6.93 s |
+### mode=3 run=1 17:50:58
+# MOBS[ML-DSA] benchmark: ML-DSA mode 3, Ligero K=2^14, rate 1/4, t=641 (column bound 2^-192.0), sI=4 sL=3 sQ=3
+| step | time |
+|---|---|
+| KeyGen | 0.152 ms |
+| User1 (commit, n=8) | 0.002 ms |
+| Sign (FIPS 204) | 0.580 ms |
+| User2 (verify) | 0.152 ms |
+
+| n | Keccak-f perms | mults | free wires | linear constr. | rows | opening size | open (build+prove) | verify (build+check) |
+|---|---|---|---|---|---|---|---|---|
+| 8 | 13 | 2245688 | 521778 | 635316 | 476 | 4.83 MiB | 0.63 + 18.35 s | 0.51 + 12.26 s |
+### mode=3 run=2 17:51:30
+# MOBS[ML-DSA] benchmark: ML-DSA mode 3, Ligero K=2^14, rate 1/4, t=641 (column bound 2^-192.0), sI=4 sL=3 sQ=3
+| step | time |
+|---|---|
+| KeyGen | 0.151 ms |
+| User1 (commit, n=8) | 0.002 ms |
+| Sign (FIPS 204) | 0.611 ms |
+| User2 (verify) | 0.149 ms |
+
+| n | Keccak-f perms | mults | free wires | linear constr. | rows | opening size | open (build+prove) | verify (build+check) |
+|---|---|---|---|---|---|---|---|---|
+| 8 | 13 | 2245688 | 521778 | 635316 | 476 | 4.83 MiB | 0.63 + 18.17 s | 0.51 + 12.50 s |
+### mode=3 run=3 17:52:02
+# MOBS[ML-DSA] benchmark: ML-DSA mode 3, Ligero K=2^14, rate 1/4, t=641 (column bound 2^-192.0), sI=4 sL=3 sQ=3
+| step | time |
+|---|---|
+| KeyGen | 0.174 ms |
+| User1 (commit, n=8) | 0.002 ms |
+| Sign (FIPS 204) | 0.587 ms |
+| User2 (verify) | 0.152 ms |
+
+| n | Keccak-f perms | mults | free wires | linear constr. | rows | opening size | open (build+prove) | verify (build+check) |
+|---|---|---|---|---|---|---|---|---|
+| 8 | 13 | 2245688 | 521778 | 635316 | 476 | 4.83 MiB | 0.63 + 18.18 s | 0.44 + 12.32 s |
+### mode=3 run=4 17:52:33
+# MOBS[ML-DSA] benchmark: ML-DSA mode 3, Ligero K=2^14, rate 1/4, t=641 (column bound 2^-192.0), sI=4 sL=3 sQ=3
+| step | time |
+|---|---|
+| KeyGen | 0.151 ms |
+| User1 (commit, n=8) | 0.002 ms |
+| Sign (FIPS 204) | 0.537 ms |
+| User2 (verify) | 0.201 ms |
+
+| n | Keccak-f perms | mults | free wires | linear constr. | rows | opening size | open (build+prove) | verify (build+check) |
+|---|---|---|---|---|---|---|---|---|
+| 8 | 13 | 2245688 | 521778 | 635316 | 476 | 4.83 MiB | 0.67 + 18.38 s | 0.46 + 12.20 s |
+### mode=3 run=5 17:53:05
+# MOBS[ML-DSA] benchmark: ML-DSA mode 3, Ligero K=2^14, rate 1/4, t=641 (column bound 2^-192.0), sI=4 sL=3 sQ=3
+| step | time |
+|---|---|
+| KeyGen | 0.251 ms |
+| User1 (commit, n=8) | 0.003 ms |
+| Sign (FIPS 204) | 0.985 ms |
+| User2 (verify) | 0.142 ms |
+
+| n | Keccak-f perms | mults | free wires | linear constr. | rows | opening size | open (build+prove) | verify (build+check) |
+|---|---|---|---|---|---|---|---|---|
+| 8 | 13 | 2245688 | 521778 | 635316 | 476 | 4.83 MiB | 0.61 + 18.22 s | 0.51 + 12.76 s |
+### mode=3 run=6 17:53:38
+# MOBS[ML-DSA] benchmark: ML-DSA mode 3, Ligero K=2^14, rate 1/4, t=641 (column bound 2^-192.0), sI=4 sL=3 sQ=3
+| step | time |
+|---|---|
+| KeyGen | 0.151 ms |
+| User1 (commit, n=8) | 0.002 ms |
+| Sign (FIPS 204) | 0.606 ms |
+| User2 (verify) | 0.160 ms |
+
+| n | Keccak-f perms | mults | free wires | linear constr. | rows | opening size | open (build+prove) | verify (build+check) |
+|---|---|---|---|---|---|---|---|---|
+| 8 | 13 | 2245688 | 521778 | 635316 | 476 | 4.83 MiB | 0.64 + 18.40 s | 0.47 + 12.12 s |
+### mode=3 run=7 17:54:10
+# MOBS[ML-DSA] benchmark: ML-DSA mode 3, Ligero K=2^14, rate 1/4, t=641 (column bound 2^-192.0), sI=4 sL=3 sQ=3
+| step | time |
+|---|---|
+| KeyGen | 0.154 ms |
+| User1 (commit, n=8) | 0.002 ms |
+| Sign (FIPS 204) | 0.596 ms |
+| User2 (verify) | 0.146 ms |
+
+| n | Keccak-f perms | mults | free wires | linear constr. | rows | opening size | open (build+prove) | verify (build+check) |
+|---|---|---|---|---|---|---|---|---|
+| 8 | 13 | 2245688 | 521778 | 635316 | 476 | 4.83 MiB | 0.65 + 18.41 s | 0.50 + 12.30 s |
+### mode=3 run=8 17:54:42
+# MOBS[ML-DSA] benchmark: ML-DSA mode 3, Ligero K=2^14, rate 1/4, t=641 (column bound 2^-192.0), sI=4 sL=3 sQ=3
+| step | time |
+|---|---|
+| KeyGen | 0.153 ms |
+| User1 (commit, n=8) | 0.002 ms |
+| Sign (FIPS 204) | 0.565 ms |
+| User2 (verify) | 0.143 ms |
+
+| n | Keccak-f perms | mults | free wires | linear constr. | rows | opening size | open (build+prove) | verify (build+check) |
+|---|---|---|---|---|---|---|---|---|
+| 8 | 13 | 2245688 | 521778 | 635316 | 476 | 4.83 MiB | 0.66 + 18.38 s | 0.60 + 12.24 s |
+### mode=3 run=9 17:55:14
+# MOBS[ML-DSA] benchmark: ML-DSA mode 3, Ligero K=2^14, rate 1/4, t=641 (column bound 2^-192.0), sI=4 sL=3 sQ=3
+| step | time |
+|---|---|
+| KeyGen | 0.153 ms |
+| User1 (commit, n=8) | 0.002 ms |
+| Sign (FIPS 204) | 0.520 ms |
+| User2 (verify) | 0.144 ms |
+
+| n | Keccak-f perms | mults | free wires | linear constr. | rows | opening size | open (build+prove) | verify (build+check) |
+|---|---|---|---|---|---|---|---|---|
+| 8 | 13 | 2245688 | 521778 | 635316 | 476 | 4.83 MiB | 0.63 + 18.76 s | 0.52 + 12.44 s |
+### mode=3 run=10 17:55:46
+# MOBS[ML-DSA] benchmark: ML-DSA mode 3, Ligero K=2^14, rate 1/4, t=641 (column bound 2^-192.0), sI=4 sL=3 sQ=3
+| step | time |
+|---|---|
+| KeyGen | 0.160 ms |
+| User1 (commit, n=8) | 0.003 ms |
+| Sign (FIPS 204) | 0.737 ms |
+| User2 (verify) | 0.153 ms |
+
+| n | Keccak-f perms | mults | free wires | linear constr. | rows | opening size | open (build+prove) | verify (build+check) |
+|---|---|---|---|---|---|---|---|---|
+| 8 | 13 | 2245688 | 521778 | 635316 | 476 | 4.83 MiB | 0.67 + 18.77 s | 0.49 + 12.64 s |
+### mode=5 run=1 17:56:19
+# MOBS[ML-DSA] benchmark: ML-DSA mode 5, Ligero K=2^14, rate 1/4, t=855 (column bound 2^-256.1), sI=6 sL=4 sQ=4
+| step | time |
+|---|---|
+| KeyGen | 0.242 ms |
+| User1 (commit, n=8) | 0.002 ms |
+| Sign (FIPS 204) | 0.711 ms |
+| User2 (verify) | 0.252 ms |
+
+| n | Keccak-f perms | mults | free wires | linear constr. | rows | opening size | open (build+prove) | verify (build+check) |
+|---|---|---|---|---|---|---|---|---|
+| 8 | 16 | 2815034 | 650380 | 791454 | 609 | 7.61 MiB | 0.78 + 30.05 s | 0.62 + 21.69 s |
+### mode=5 run=2 17:57:13
+# MOBS[ML-DSA] benchmark: ML-DSA mode 5, Ligero K=2^14, rate 1/4, t=855 (column bound 2^-256.1), sI=6 sL=4 sQ=4
+| step | time |
+|---|---|
+| KeyGen | 0.240 ms |
+| User1 (commit, n=8) | 0.002 ms |
+| Sign (FIPS 204) | 0.651 ms |
+| User2 (verify) | 0.257 ms |
+
+| n | Keccak-f perms | mults | free wires | linear constr. | rows | opening size | open (build+prove) | verify (build+check) |
+|---|---|---|---|---|---|---|---|---|
+| 8 | 16 | 2815034 | 650380 | 791454 | 609 | 7.61 MiB | 0.81 + 30.39 s | 0.59 + 21.05 s |
+### mode=5 run=3 17:58:06
+# MOBS[ML-DSA] benchmark: ML-DSA mode 5, Ligero K=2^14, rate 1/4, t=855 (column bound 2^-256.1), sI=6 sL=4 sQ=4
+| step | time |
+|---|---|
+| KeyGen | 0.232 ms |
+| User1 (commit, n=8) | 0.002 ms |
+| Sign (FIPS 204) | 0.721 ms |
+| User2 (verify) | 0.251 ms |
+
+| n | Keccak-f perms | mults | free wires | linear constr. | rows | opening size | open (build+prove) | verify (build+check) |
+|---|---|---|---|---|---|---|---|---|
+| 8 | 16 | 2815034 | 650380 | 791454 | 609 | 7.61 MiB | 0.76 + 29.98 s | 0.57 + 20.87 s |
+### mode=5 run=4 17:58:58
+# MOBS[ML-DSA] benchmark: ML-DSA mode 5, Ligero K=2^14, rate 1/4, t=855 (column bound 2^-256.1), sI=6 sL=4 sQ=4
+| step | time |
+|---|---|
+| KeyGen | 0.234 ms |
+| User1 (commit, n=8) | 0.002 ms |
+| Sign (FIPS 204) | 0.724 ms |
+| User2 (verify) | 0.250 ms |
+
+| n | Keccak-f perms | mults | free wires | linear constr. | rows | opening size | open (build+prove) | verify (build+check) |
+|---|---|---|---|---|---|---|---|---|
+| 8 | 16 | 2815034 | 650380 | 791454 | 609 | 7.61 MiB | 0.77 + 29.06 s | 0.63 + 21.06 s |
+### mode=5 run=5 17:59:50
+# MOBS[ML-DSA] benchmark: ML-DSA mode 5, Ligero K=2^14, rate 1/4, t=855 (column bound 2^-256.1), sI=6 sL=4 sQ=4
+| step | time |
+|---|---|
+| KeyGen | 0.235 ms |
+| User1 (commit, n=8) | 0.002 ms |
+| Sign (FIPS 204) | 0.658 ms |
+| User2 (verify) | 0.243 ms |
+
+| n | Keccak-f perms | mults | free wires | linear constr. | rows | opening size | open (build+prove) | verify (build+check) |
+|---|---|---|---|---|---|---|---|---|
+| 8 | 16 | 2815034 | 650380 | 791454 | 609 | 7.61 MiB | 0.71 + 29.12 s | 0.64 + 21.13 s |
+### mode=5 run=6 18:00:42
+# MOBS[ML-DSA] benchmark: ML-DSA mode 5, Ligero K=2^14, rate 1/4, t=855 (column bound 2^-256.1), sI=6 sL=4 sQ=4
+| step | time |
+|---|---|
+| KeyGen | 0.237 ms |
+| User1 (commit, n=8) | 0.002 ms |
+| Sign (FIPS 204) | 0.713 ms |
+| User2 (verify) | 0.248 ms |
+
+| n | Keccak-f perms | mults | free wires | linear constr. | rows | opening size | open (build+prove) | verify (build+check) |
+|---|---|---|---|---|---|---|---|---|
+| 8 | 16 | 2815034 | 650380 | 791454 | 609 | 7.61 MiB | 0.75 + 29.85 s | 0.60 + 21.27 s |
+### mode=5 run=7 18:01:35
+# MOBS[ML-DSA] benchmark: ML-DSA mode 5, Ligero K=2^14, rate 1/4, t=855 (column bound 2^-256.1), sI=6 sL=4 sQ=4
+| step | time |
+|---|---|
+| KeyGen | 0.248 ms |
+| User1 (commit, n=8) | 0.002 ms |
+| Sign (FIPS 204) | 0.784 ms |
+| User2 (verify) | 0.272 ms |
+
+| n | Keccak-f perms | mults | free wires | linear constr. | rows | opening size | open (build+prove) | verify (build+check) |
+|---|---|---|---|---|---|---|---|---|
+| 8 | 16 | 2815034 | 650380 | 791454 | 609 | 7.61 MiB | 0.83 + 31.12 s | 0.65 + 20.90 s |
+### mode=5 run=8 18:02:29
+# MOBS[ML-DSA] benchmark: ML-DSA mode 5, Ligero K=2^14, rate 1/4, t=855 (column bound 2^-256.1), sI=6 sL=4 sQ=4
+| step | time |
+|---|---|
+| KeyGen | 0.239 ms |
+| User1 (commit, n=8) | 0.002 ms |
+| Sign (FIPS 204) | 0.726 ms |
+| User2 (verify) | 0.253 ms |
+
+| n | Keccak-f perms | mults | free wires | linear constr. | rows | opening size | open (build+prove) | verify (build+check) |
+|---|---|---|---|---|---|---|---|---|
+| 8 | 16 | 2815034 | 650380 | 791454 | 609 | 7.61 MiB | 0.87 + 30.06 s | 0.64 + 21.60 s |
+### mode=5 run=9 18:03:22
+# MOBS[ML-DSA] benchmark: ML-DSA mode 5, Ligero K=2^14, rate 1/4, t=855 (column bound 2^-256.1), sI=6 sL=4 sQ=4
+| step | time |
+|---|---|
+| KeyGen | 0.240 ms |
+| User1 (commit, n=8) | 0.002 ms |
+| Sign (FIPS 204) | 0.698 ms |
+| User2 (verify) | 0.254 ms |
+
+| n | Keccak-f perms | mults | free wires | linear constr. | rows | opening size | open (build+prove) | verify (build+check) |
+|---|---|---|---|---|---|---|---|---|
+| 8 | 16 | 2815034 | 650380 | 791454 | 609 | 7.61 MiB | 0.81 + 30.33 s | 0.68 + 21.53 s |
+### mode=5 run=10 18:04:16
+# MOBS[ML-DSA] benchmark: ML-DSA mode 5, Ligero K=2^14, rate 1/4, t=855 (column bound 2^-256.1), sI=6 sL=4 sQ=4
+| step | time |
+|---|---|
+| KeyGen | 0.238 ms |
+| User1 (commit, n=8) | 0.002 ms |
+| Sign (FIPS 204) | 0.691 ms |
+| User2 (verify) | 0.245 ms |
+
+| n | Keccak-f perms | mults | free wires | linear constr. | rows | opening size | open (build+prove) | verify (build+check) |
+|---|---|---|---|---|---|---|---|---|
+| 8 | 16 | 2815034 | 650380 | 791454 | 609 | 7.61 MiB | 0.77 + 30.57 s | 0.71 + 22.07 s |
+DONE
