@@ -145,7 +145,25 @@ Nhật ký gốc: `bench/results/bench-2026-11-11.log`.
 Độ lệch chuẩn tương đối của Open/Verify không quá 2,4 %. Số ràng buộc và kích thước
 opening là tất định và trùng với lần đo trước.
 
-### 5.2. Lần đo trước (06-11-2026, một lần chạy cho mỗi cấu hình)
+### 5.2. Đo trên Apple M4 (11-11-2026)
+
+Máy: 1 nhân của máy ảo Linux (aarch64, 4 vCPU) chạy trên Mac dùng chip Apple
+M4-series, ghim nhân bằng `taskset -c 0`, GCC `-O2`. Cùng quy trình như 5.1;
+nhật ký gốc: `bench/results/bench-2026-11-11-apple.log`.
+
+| | ML-DSA-44 | ML-DSA-65 | ML-DSA-87 |
+|---|---|---|---|
+| KeyGen (ms) | 0,041 ± 0,001 | 0,079 ± 0,001 | 0,120 ± 0,009 |
+| User₁ (ms) | 0,001 | 0,001 | 0,001 |
+| Sign, FIPS 204 (ms) | 0,20 ± 0,02 | 0,31 ± 0,02 | 0,39 ± 0,02 |
+| User₂ (ms) | 0,047 ± 0,001 | 0,075 ± 0,001 | 0,123 ± 0,002 |
+| Open (s) | 7,15 ± 0,10 | 10,67 ± 0,06 | 17,15 ± 0,11 |
+| Verify (s) | 4,08 ± 0,05 | 7,15 ± 0,04 | 12,34 ± 0,08 |
+
+Độ lệch chuẩn tương đối của Open/Verify không quá 1,4 %. BB26 đo trên Apple M3 Pro
+(macOS, Rust); vì vậy số liệu ở mục này là số nên dùng khi so sánh với BB26.
+
+### 5.3. Lần đo trước (06-11-2026, một lần chạy cho mỗi cấu hình)
 
 Máy: 1 nhân Intel Xeon @ 2,30 GHz (máy ảo), GCC 13.3 `-O2`, một luồng.
 
