@@ -226,5 +226,5 @@ bằng `mobs_set_ligero_params()`; `lg_params_test()` chỉ dùng cho kiểm th�
 * OSE của Ligero/BCS dựa trên lập luận trích xuất straight-line chuẩn trong ROM;
   chứng minh hình thức cho đúng biến thể này và trường hợp QROM còn mở
   (`DESIGN.md` §3.5).
-* Mã của dự án chưa gắn giấy phép; `third_party/dilithium` giữ giấy phép gốc
-  (CC0 hoặc Apache-2.0).
+* Mã của dự án dùng giấy phép MIT (xem `LICENSE`); `third_party/dilithium` giữ
+  giấy phép gốc (CC0 hoặc Apache-2.0).
