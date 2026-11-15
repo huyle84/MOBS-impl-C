@@ -147,7 +147,7 @@ opening là tất định và trùng với lần đo trước.
 
 ### 5.2. Đo trên Apple M4 (11-11-2026)
 
-> Ghi chú 15-11-2026: máy Mac mini của tác giả là Apple M2 (16 GB, macOS 26.2). Trên máy ảo Linux của máy này, cùng mã nguồn cho Open 8,45 s và Verify 4,85 s (ML-DSA-44), chậm hơn số dưới đây khoảng 16 %; số đo mới ở mục 5.4.
+> Ghi chú 15-11-2026: máy Mac mini của tác giả là Apple M2 (16 GB, macOS 26.2). Trên máy ảo Linux của máy này, cùng mã nguồn cho Open 8,45 s và Verify 4,85 s (ML-DSA-44), chậm hơn số dưới đây khoảng 16 %; số đo mới ở mục 5.4 (máy ảo) và 5.5 (chạy trực tiếp trên macOS, số dùng trong bản thảo).
 
 Máy: 1 nhân của máy ảo Linux (aarch64, 4 vCPU) chạy trên Mac dùng chip Apple
 M4-series, ghim nhân bằng `taskset -c 0`, GCC `-O2`. Cùng quy trình như 5.1;
@@ -174,7 +174,7 @@ và số luồng, n = 8; một luồng thì ghim nhân 0 bằng `taskset`), th�
 * **Xeon**: máy ảo Ubuntu 24.04, 2 vCPU, CPU báo là "Intel Xeon Processor @ 2.10GHz", GCC 13.3 `-O2 -fopenmp`.
   Nhật ký: `bench/results/bench-xeon-2026-11-15.log`.
 * **Apple M2**: máy ảo Ubuntu 22.04 (aarch64, 4 vCPU, 3 GiB) trên Mac mini M2 (16 GB, macOS 26.2), GCC 11.4 `-O2 -fopenmp`.
-  Nhật ký: `bench/results/bench-m2-2026-11-15.log`.
+  Nhật ký: `bench/results/bench-m2-2026-11-15.log`. Số Apple M2 trong bản thảo nay lấy từ lần chạy trực tiếp trên macOS (mục 5.5).
 
 | Xeon | ML-DSA-44 | ML-DSA-65 | ML-DSA-87 |
 |---|---|---|---|
@@ -202,6 +202,53 @@ và số luồng, n = 8; một luồng thì ghim nhân 0 bằng `taskset`), th�
 | Masked, 2 luồng (10 lần) | 806 ± 107 ms | 939 ± 92 ms | 785 ± 58 ms | 1 011 909 B |
 | Hashed, 1 luồng (5 lần) | ≈ 0 | 1948 ± 105 ms | 1053 ± 70 ms | 1 037 509 B |
 | Hashed, 2 luồng (5 lần) | ≈ 0 | 1775 ± 162 ms | 819 ± 34 ms | 1 037 509 B |
+
+### 5.5. Chạy trực tiếp trên macOS, Apple M2, và so sánh với [BB26] trên cùng máy (15-11-2026)
+
+Máy: Mac mini M2 (4 nhân hiệu năng cao + 4 nhân tiết kiệm điện, 16 GB), macOS 26.2 (25C56), Homebrew GCC 16.2
+`-O2 -fopenmp`, không `-march`. macOS không cho ghim tiến trình vào một nhân, nên lần chạy một luồng không ghim.
+Script: `bench/run_bench_10_macos.sh` (10 lần cho mỗi bộ tham số và số luồng, n = 8, cộng một lần đo bộ nhớ đỉnh
+bằng `/usr/bin/time -l`); thống kê: `bench/stats_threads.py` và `bench/mobs_mem.awk`.
+Nhật ký: `bench/results/bench-m2-macos-2026-11-15.log`.
+
+```sh
+brew install gcc
+GCC=$(ls /opt/homebrew/bin/gcc-[0-9]* | tail -1)
+make clean && make -j8 CC="$GCC" && make check CC="$GCC"
+LOG=bench/results/bench-m2-macos-$(date +%F).log
+caffeinate -i env THREADS="1 4" CC="$GCC" bench/run_bench_10_macos.sh "$LOG"
+python3 bench/stats_threads.py "$LOG"; awk -f bench/mobs_mem.awk "$LOG"
+```
+
+| Apple M2, macOS | ML-DSA-44 | ML-DSA-65 | ML-DSA-87 |
+|---|---|---|---|
+| KeyGen (ms) | 0,047 | 0,088 | 0,129 |
+| User₁ (ms) | 0,002 | 0,002 | 0,002 |
+| Sign, FIPS 204 (ms) | 0,22 ± 0,01 | 0,37 ± 0,02 | 0,43 ± 0,01 |
+| User₂ (ms) | 0,052 | 0,085 | 0,138 |
+| Open, 1 luồng (s) | 3,53 ± 0,03 | 5,00 ± 0,01 | 7,70 ± 0,02 |
+| Open, 4 luồng (s) | 1,41 ± 0,01 | 1,98 ± 0,00 | 3,06 ± 0,06 |
+| Verify, 1 luồng (s) | 2,07 ± 0,03 | 3,65 ± 0,00 | 6,34 ± 0,03 |
+| Verify, 4 luồng (s) | 1,15 ± 0,00 | 2,06 ± 0,00 | 3,66 ± 0,03 |
+| Bộ nhớ đỉnh, 1 luồng | 0,81 GiB | 0,91 GiB | 1,13 GiB |
+
+Độ lệch chuẩn tương đối của Open/Verify không quá 2,0 %. Bốn luồng nhanh hơn một luồng khoảng 2,5 lần (Open) và
+1,8 lần (Verify). Cùng mã nguồn trong máy ảo Linux của chính máy này (GCC 11.4, mục 5.4) chậm hơn khoảng 2,4 lần;
+chúng tôi chưa tách được phần do phiên bản trình biên dịch và phần do ảo hóa.
+
+**[BB26] trên cùng máy M2 (macOS).** Cấu hình như mục 5.4, Rust stable 1.97 (`RUSTUP_TOOLCHAIN=stable`), các
+thiết lập build của họ (`target-cpu=native`, `aes_armv8`). Thống kê: `bench/bb26/bb26_stats.awk`.
+Nhật ký: `bench/results/bb26-m2-2026-11-15.log`.
+
+| [BB26], Apple M2 | Sign₁ (commit) | Prove | Verify | Proof |
+|---|---|---|---|---|
+| Masked, 1 luồng (10 lần) | 241 ± 11 ms | 897 ± 6 ms | 545 ± 1 ms | 1 011 909 B |
+| Masked, 4 luồng (10 lần) | 235 ± 1 ms | 896 ± 3 ms | 542 ± 2 ms | 1 011 909 B |
+| Hashed, 1 luồng (10 lần) | ≈ 0 | 1167 ± 3 ms | 558 ± 3 ms | 1 037 509 B |
+
+Với một luồng, opening của MOBS (ML-DSA-44) mất 3,53 s để tạo và 2,07 s để kiểm tra, khoảng 3,9 và 3,8 lần lâu
+hơn chứng minh của [BB26]; với bốn luồng là 1,41 s và 1,15 s, khoảng 1,6 và 2,1 lần (mã [BB26] không nhanh hơn
+khi tăng số luồng trong cấu hình này). Trên máy Xeon (mục 5.4) tỉ lệ là khoảng 11 và 7 lần.
 
 ### 5.3. Lần đo trước (06-11-2026, một lần chạy cho mỗi cấu hình)
 
