@@ -15,6 +15,12 @@ MODES   := 2 3 5
 SRC     := src/field.c src/cs.c src/gadgets.c src/keccak_circuit.c src/mldsa_circuit.c src/ligero.c src/xof.c src/mobs.c
 REFSRC  := sign packing polyvec poly ntt reduce rounding fips202 symmetric-shake randombytes
 HDRS    := $(wildcard src/*.h)
+# OpenMP (multi-threaded prover and verifier); build with OPENMP=0 for compilers
+# without OpenMP support (e.g. Apple clang without libomp).
+OPENMP  ?= 1
+ifeq ($(OPENMP),1)
+CFLAGS  += -fopenmp
+endif
 LDLIBS  := -lm
 
 all: $(foreach m,$(MODES),build/libmobs$(m).a build/test_mldsa_circuit$(m) build/test_mobs$(m) build/demo$(m) build/bench_mobs$(m)) \

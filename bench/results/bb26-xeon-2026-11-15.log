@@ -1,0 +1,35 @@
+# RAYON_NUM_THREADS=1 masked
+run=0 mode=Masked commit_ms=935.30 prove_ms=1114.74 verify_ms=899.16 proof_bytes=1011909
+run=1 mode=Masked commit_ms=814.66 prove_ms=1106.16 verify_ms=1062.03 proof_bytes=1011909
+run=2 mode=Masked commit_ms=854.24 prove_ms=1127.90 verify_ms=840.57 proof_bytes=1011909
+run=3 mode=Masked commit_ms=677.46 prove_ms=924.14 verify_ms=979.67 proof_bytes=1011909
+run=4 mode=Masked commit_ms=833.28 prove_ms=1183.57 verify_ms=937.54 proof_bytes=1011909
+run=5 mode=Masked commit_ms=848.65 prove_ms=1064.15 verify_ms=914.54 proof_bytes=1011909
+run=6 mode=Masked commit_ms=732.89 prove_ms=1114.96 verify_ms=1305.31 proof_bytes=1011909
+run=7 mode=Masked commit_ms=885.04 prove_ms=976.28 verify_ms=1064.76 proof_bytes=1011909
+run=8 mode=Masked commit_ms=896.34 prove_ms=1139.42 verify_ms=923.98 proof_bytes=1011909
+run=9 mode=Masked commit_ms=841.96 prove_ms=1270.37 verify_ms=1053.78 proof_bytes=1011909
+# RAYON_NUM_THREADS=2 masked
+run=0 mode=Masked commit_ms=908.12 prove_ms=924.62 verify_ms=714.50 proof_bytes=1011909
+run=1 mode=Masked commit_ms=634.98 prove_ms=933.17 verify_ms=815.88 proof_bytes=1011909
+run=2 mode=Masked commit_ms=814.49 prove_ms=1085.82 verify_ms=797.06 proof_bytes=1011909
+run=3 mode=Masked commit_ms=784.64 prove_ms=842.40 verify_ms=867.05 proof_bytes=1011909
+run=4 mode=Masked commit_ms=784.71 prove_ms=900.48 verify_ms=789.77 proof_bytes=1011909
+run=5 mode=Masked commit_ms=1027.16 prove_ms=964.24 verify_ms=718.80 proof_bytes=1011909
+run=6 mode=Masked commit_ms=783.19 prove_ms=913.25 verify_ms=788.24 proof_bytes=1011909
+run=7 mode=Masked commit_ms=815.46 prove_ms=1037.80 verify_ms=804.41 proof_bytes=1011909
+run=8 mode=Masked commit_ms=811.82 prove_ms=1016.44 verify_ms=852.57 proof_bytes=1011909
+run=9 mode=Masked commit_ms=692.79 prove_ms=775.42 verify_ms=697.22 proof_bytes=1011909
+# RAYON_NUM_THREADS=1 hashed
+run=0 mode=Hashed commit_ms=0.02 prove_ms=1906.75 verify_ms=1010.42 proof_bytes=1037509
+run=1 mode=Hashed commit_ms=0.08 prove_ms=2094.93 verify_ms=966.89 proof_bytes=1037509
+run=2 mode=Hashed commit_ms=0.02 prove_ms=2010.92 verify_ms=1151.39 proof_bytes=1037509
+run=3 mode=Hashed commit_ms=0.03 prove_ms=1904.77 verify_ms=1077.13 proof_bytes=1037509
+run=4 mode=Hashed commit_ms=0.03 prove_ms=1824.37 verify_ms=1058.72 proof_bytes=1037509
+# RAYON_NUM_THREADS=2 hashed
+run=0 mode=Hashed commit_ms=0.03 prove_ms=1940.43 verify_ms=863.53 proof_bytes=1037509
+run=1 mode=Hashed commit_ms=0.02 prove_ms=1906.60 verify_ms=788.45 proof_bytes=1037509
+run=2 mode=Hashed commit_ms=0.02 prove_ms=1534.00 verify_ms=847.38 proof_bytes=1037509
+run=3 mode=Hashed commit_ms=0.02 prove_ms=1756.63 verify_ms=801.92 proof_bytes=1037509
+run=4 mode=Hashed commit_ms=0.02 prove_ms=1739.75 verify_ms=794.48 proof_bytes=1037509
+DONE

@@ -147,6 +147,8 @@ opening là tất định và trùng với lần đo trước.
 
 ### 5.2. Đo trên Apple M4 (11-11-2026)
 
+> Ghi chú 15-11-2026: máy Mac mini của tác giả là Apple M2 (16 GB, macOS 26.2). Trên máy ảo Linux của máy này, cùng mã nguồn cho Open 8,45 s và Verify 4,85 s (ML-DSA-44), chậm hơn số dưới đây khoảng 16 %; số đo mới ở mục 5.4.
+
 Máy: 1 nhân của máy ảo Linux (aarch64, 4 vCPU) chạy trên Mac dùng chip Apple
 M4-series, ghim nhân bằng `taskset -c 0`, GCC `-O2`. Cùng quy trình như 5.1;
 nhật ký gốc: `bench/results/bench-2026-11-11-apple.log`.
@@ -162,6 +164,44 @@ nhật ký gốc: `bench/results/bench-2026-11-11-apple.log`.
 
 Độ lệch chuẩn tương đối của Open/Verify không quá 1,4 %. BB26 đo trên Apple M3 Pro
 (macOS, Rust); vì vậy số liệu ở mục này là số nên dùng khi so sánh với BB26.
+
+### 5.4. Đo đa luồng và so sánh với [BB26] trên cùng máy (15-11-2026)
+
+Bản OpenMP: `make` (mặc định `OPENMP=1`; dùng `make OPENMP=0` nếu trình biên dịch không hỗ trợ OpenMP).
+Số luồng đặt bằng `OMP_NUM_THREADS`. Script: `bench/run_bench_10_threads.sh` (10 lần cho mỗi bộ tham số
+và số luồng, n = 8; một luồng thì ghim nhân 0 bằng `taskset`), thống kê: `bench/stats_threads.py`.
+
+* **Xeon**: máy ảo Ubuntu 24.04, 2 vCPU, CPU báo là "Intel Xeon Processor @ 2.10GHz", GCC 13.3 `-O2 -fopenmp`.
+  Nhật ký: `bench/results/bench-xeon-2026-11-15.log`.
+* **Apple M2**: máy ảo Ubuntu 22.04 (aarch64, 4 vCPU, 3 GiB) trên Mac mini M2 (16 GB, macOS 26.2), GCC 11.4 `-O2 -fopenmp`.
+  Nhật ký: `bench/results/bench-m2-2026-11-15.log`.
+
+| Xeon | ML-DSA-44 | ML-DSA-65 | ML-DSA-87 |
+|---|---|---|---|
+| Open, 1 luồng (s) | 12,09 ± 0,55 | 18,84 ± 0,26 | 29,79 ± 0,92 |
+| Open, 2 luồng (s) | 6,96 ± 0,33 | 10,69 ± 0,29 | 16,74 ± 0,60 |
+| Verify, 1 luồng (s) | 7,22 ± 0,38 | 12,67 ± 0,61 | 21,58 ± 0,95 |
+| Verify, 2 luồng (s) | 4,49 ± 0,17 | 7,92 ± 0,35 | 13,48 ± 0,35 |
+| Bộ nhớ đỉnh, 1 luồng | 0,74 GiB | 0,77 GiB | 1,02 GiB |
+
+| Apple M2 | ML-DSA-44 | ML-DSA-65 | ML-DSA-87 |
+|---|---|---|---|
+| Open, 1 luồng (s) | 8,47 ± 0,06 | 12,77 ± 0,09 | 20,30 ± 0,27 |
+| Open, 4 luồng (s) | 2,86 ± 0,01 | 4,18 ± 0,01 | 6,64 ± 0,09 |
+| Verify, 1 luồng (s) | 4,88 ± 0,05 | 8,58 ± 0,04 | 14,65 ± 0,14 |
+| Verify, 4 luồng (s) | 2,11 ± 0,01 | 3,74 ± 0,01 | 6,45 ± 0,04 |
+
+**[BB26] trên cùng máy Xeon.** Mã của [BB26] (`blind_mldsa` + bản fork `swanky`, cấu hình của Bảng 4 trong bài:
+`ThreeBits`, `Fwd3`, `GeneralORAM` với 213 vòng, `Crt`, `ExponentCheck`), Rust 1.97, các thiết lập build của họ
+(`target-cpu=native`, LTO). Chương trình đo: `bench/bb26/oneshot.rs` (đặt vào `blind_mldsa/examples/`, chạy
+`cargo run --release --example oneshot 10 masked`). Nhật ký: `bench/results/bb26-xeon-2026-11-15.log`.
+
+| [BB26], Xeon | Sign₁ (commit) | Prove | Verify | Proof |
+|---|---|---|---|---|
+| Masked, 1 luồng (10 lần) | 832 ± 76 ms | 1102 ± 98 ms | 998 ± 132 ms | 1 011 909 B |
+| Masked, 2 luồng (10 lần) | 806 ± 107 ms | 939 ± 92 ms | 785 ± 58 ms | 1 011 909 B |
+| Hashed, 1 luồng (5 lần) | ≈ 0 | 1948 ± 105 ms | 1053 ± 70 ms | 1 037 509 B |
+| Hashed, 2 luồng (5 lần) | ≈ 0 | 1775 ± 162 ms | 819 ± 34 ms | 1 037 509 B |
 
 ### 5.3. Lần đo trước (06-11-2026, một lần chạy cho mỗi cấu hình)
 

@@ -27,6 +27,14 @@
 #include "fips202.h"
 #include "randombytes.h"
 #include "xof.h"
+#ifdef _OPENMP
+#include <omp.h>
+#define LG_NT omp_get_max_threads()
+#define LG_TID omp_get_thread_num()
+#else
+#define LG_NT 1
+#define LG_TID 0
+#endif
 
 /* Merkle digest and salt length: 2*lambda bits (collision resistance lambda bits),
  * i.e. 32 / 48 / 64 bytes for lambda = 128 / 192 / 256. */
@@ -327,11 +335,17 @@ int lg_prove(const cs_t *cs, const lg_params_t *P, const uint8_t *stmt, size_t s
     free(V); free(U); free(buf);
     return -3;
   }
-  for (size_t r = 0; r < Ly.R; r++) {
-    memcpy(buf, V + r * ell, ell * sizeof(fe));
-    rand_fe(buf + ell, Ly.tpad);
-    fe_intt(buf, Ly.logK);
-    fe_coset_eval(U + r * n, buf, K, FE_GEN, Ly.logn);
+#pragma omp parallel
+  {
+    fe *bufp = malloc(2 * K * sizeof(fe));
+#pragma omp for schedule(dynamic, 4)
+    for (size_t r = 0; r < Ly.R; r++) {
+      memcpy(bufp, V + r * ell, ell * sizeof(fe));
+      rand_fe(bufp + ell, Ly.tpad);
+      fe_intt(bufp, Ly.logK);
+      fe_coset_eval(U + r * n, bufp, K, FE_GEN, Ly.logn);
+    }
+    free(bufp);
   }
   free(V);
   for (unsigned s = 0; s < P->sI; s++) { /* u'_s */
@@ -367,11 +381,21 @@ int lg_prove(const cs_t *cs, const lg_params_t *P, const uint8_t *stmt, size_t s
   uint8_t *tree = malloc(2 * n * HB);
   fe *col = malloc(Ly.RT * sizeof(fe));
   uint8_t *scratch = malloc(8 * Ly.RT);
-  for (size_t j = 0; j < n; j++) {
-    for (size_t r = 0; r < Ly.RT; r++) col[r] = U[r * n + j];
-    leaf_hash(tree + (n + j) * HB, &MK, salts + j * HB, col, Ly.RT, scratch);
+#pragma omp parallel
+  {
+    fe *colp = malloc(Ly.RT * sizeof(fe));
+    uint8_t *scr = malloc(8 * Ly.RT);
+#pragma omp for schedule(static)
+    for (size_t j = 0; j < n; j++) {
+      for (size_t r = 0; r < Ly.RT; r++) colp[r] = U[r * n + j];
+      leaf_hash(tree + (n + j) * HB, &MK, salts + j * HB, colp, Ly.RT, scr);
+    }
+    free(colp); free(scr);
   }
-  for (size_t i = n - 1; i >= 1; i--) node_hash(tree + i * HB, &MK, tree + 2 * i * HB, tree + (2 * i + 1) * HB);
+  for (size_t lo = n / 2; lo >= 1; lo /= 2) {
+#pragma omp parallel for schedule(static) if (lo >= 256)
+    for (size_t i = lo; i < 2 * lo; i++) node_hash(tree + i * HB, &MK, tree + 2 * i * HB, tree + (2 * i + 1) * HB);
+  }
   double t1 = now();
 
   /* 4. transcript */
@@ -397,6 +421,7 @@ int lg_prove(const cs_t *cs, const lg_params_t *P, const uint8_t *stmt, size_t s
     for (size_t r = 0; r < Ly.R; r++) {
       fe c = xof_fe(&x);
       const fe *Ur = U + r * n;
+#pragma omp parallel for schedule(static)
       for (size_t j = 0; j < n; j++) acc[j] = fe_add(acc[j], fe_mul(c, Ur[j]));
     }
     fe_coset_interp(acc, acc, FE_GEN, Ly.logn);
@@ -409,10 +434,24 @@ int lg_prove(const cs_t *cs, const lg_params_t *P, const uint8_t *stmt, size_t s
     tr_xof(&T, "rL", s, &x);
     fe target = linear_combination(cs, &Ly, &x, cvec);
     memcpy(acc, U + (Ly.mL + s) * n, n * sizeof(fe));
-    for (size_t r = 0; r < Ly.R; r++) {
-      row_poly_on_L(tmp, cvec + r * ell, &Ly, buf);
-      const fe *Ur = U + r * n;
-      for (size_t j = 0; j < n; j++) acc[j] = fe_add(acc[j], fe_mul(tmp[j], Ur[j]));
+    {
+      int NT = LG_NT;
+      fe *accT = calloc((size_t)NT * n, sizeof(fe));
+#pragma omp parallel
+      {
+        fe *tmpp = malloc(n * sizeof(fe)), *bufp = malloc(2 * K * sizeof(fe));
+        fe *a = accT + (size_t)LG_TID * n;
+#pragma omp for schedule(dynamic, 2)
+        for (size_t r = 0; r < Ly.R; r++) {
+          row_poly_on_L(tmpp, cvec + r * ell, &Ly, bufp);
+          const fe *Ur = U + r * n;
+          for (size_t j = 0; j < n; j++) a[j] = fe_add(a[j], fe_mul(tmpp[j], Ur[j]));
+        }
+        free(tmpp); free(bufp);
+      }
+      for (int t = 0; t < NT; t++)
+        for (size_t j = 0; j < n; j++) acc[j] = fe_add(acc[j], accT[(size_t)t * n + j]);
+      free(accT);
     }
     fe_coset_interp(acc, acc, FE_GEN, Ly.logn);
     for (size_t i = 2 * K - 1; i < n; i++)
@@ -428,6 +467,7 @@ int lg_prove(const cs_t *cs, const lg_params_t *P, const uint8_t *stmt, size_t s
     for (size_t rho = 0; rho < Ly.ZR; rho++) {
       fe c = xof_fe(&x);
       const fe *X = U + row_x(&Ly, rho) * n, *Y = U + row_y(&Ly, rho) * n, *Z = U + row_z(&Ly, rho) * n;
+#pragma omp parallel for schedule(static)
       for (size_t j = 0; j < n; j++) acc[j] = fe_add(acc[j], fe_mul(c, fe_sub(fe_mul(X[j], Y[j]), Z[j])));
     }
     fe_coset_interp(acc, acc, FE_GEN, Ly.logn);
@@ -565,9 +605,23 @@ int lg_verify(const cs_t *cs, const lg_params_t *P, const uint8_t *stmt, size_t 
       fe target = linear_combination(cs, &Ly, &x, cvec);
       if (fe_mul((fe)K, fe_add(qs[0], qs[K])) != target) { rc = -7; break; }
       for (size_t q = 0; q < tq; q++) S[q] = cols[q * RT + Ly.mL + s];
-      for (size_t r = 0; r < Ly.R; r++) {
-        row_poly_on_L(tmp, cvec + r * ell, &Ly, buf);
-        for (size_t q = 0; q < tq; q++) S[q] = fe_add(S[q], fe_mul(tmp[J[q]], cols[q * RT + r]));
+      {
+        int NT = LG_NT;
+        fe *ST = calloc((size_t)NT * tq, sizeof(fe));
+#pragma omp parallel
+        {
+          fe *tmpp = malloc(n * sizeof(fe)), *bufp = malloc(K * sizeof(fe));
+          fe *Sp = ST + (size_t)LG_TID * tq;
+#pragma omp for schedule(dynamic, 2)
+          for (size_t r = 0; r < Ly.R; r++) {
+            row_poly_on_L(tmpp, cvec + r * ell, &Ly, bufp);
+            for (size_t q = 0; q < tq; q++) Sp[q] = fe_add(Sp[q], fe_mul(tmpp[J[q]], cols[q * RT + r]));
+          }
+          free(tmpp); free(bufp);
+        }
+        for (int t = 0; t < NT; t++)
+          for (size_t q = 0; q < tq; q++) S[q] = fe_add(S[q], ST[(size_t)t * tq + q]);
+        free(ST);
       }
       for (size_t q = 0; q < tq; q++)
         if (fe_poly_eval(qs, 2 * K - 1, et[q]) != S[q]) rc = -8;
