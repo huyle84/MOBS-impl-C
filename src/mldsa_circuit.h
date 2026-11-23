@@ -45,4 +45,7 @@ int mobs_build_circuit(cs_t *cs, const mobs_stmt_t *st, const mobs_wit_t *wit, m
 /* For tests: the challenge polynomial c computed inside the circuit (witness mode). */
 extern int32_t mobs_debug_c[256];
 
+/* testing only: violations of the (O8a) range gadget for coefficient z (0 = accepted) */
+size_t mobs_test_zrange(int64_t z, int upper);
+
 #endif

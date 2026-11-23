@@ -128,6 +128,15 @@ int main(void) {
     CHECK(cs_check(&cs, 0) > 0 || cs.bad, "corrupted signature is rejected");
     cs_free(&cs);
   }
+  /* (O8a) boundary: |z| < gamma1 - beta is accepted, |z| = gamma1 - beta is rejected */
+  {
+    const int64_t B = GAMMA1 - BETA;
+    CHECK(mobs_test_zrange(B - 1, 1) == 0, "z = gamma1-beta-1 is accepted");
+    CHECK(mobs_test_zrange(-(B - 1), 1) == 0, "z = -(gamma1-beta-1) is accepted");
+    CHECK(mobs_test_zrange(B, 1) > 0, "z = gamma1-beta is rejected");
+    CHECK(mobs_test_zrange(-B, 1) > 0, "z = -(gamma1-beta) is rejected");
+    CHECK(mobs_test_zrange(B, 0) == 0, "without the upper check z = gamma1-beta would pass");
+  }
   if (fails) { printf("test_mldsa_circuit: %d failures\n", fails); return 1; }
   printf("test_mldsa_circuit: OK\n");
   return 0;

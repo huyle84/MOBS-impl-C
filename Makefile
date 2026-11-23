@@ -4,12 +4,14 @@
 #   make check      fast functional tests (insecure Ligero test parameters for the end-to-end run)
 #   make check-full end-to-end test with production parameters (ML-DSA-44, ~1 min)
 #   make bench      benchmark (production parameters)
+#   make bench-mt   10 runs per parameter set, THREADS="1 2" (Table 5; see REPRODUCE.md)
 #
 # ML-DSA is the official reference implementation (pq-crystals/dilithium, FIPS 204
 # version with context strings), compiled unmodified from third_party/.
 
 CC      ?= cc
-CFLAGS  ?= -O2 -std=gnu11 -Wall -Wextra -Wno-unused-parameter
+CFLAGS  ?= -O2
+CFLAGS  += -std=gnu11 -Wall -Wextra -Wno-unused-parameter
 REF     := third_party/dilithium/ref
 MODES   := 2 3 5
 SRC     := src/field.c src/cs.c src/gadgets.c src/keccak_circuit.c src/mldsa_circuit.c src/ligero.c src/xof.c src/mobs.c
@@ -83,7 +85,11 @@ check-full: build/test_mobs2
 bench: build/bench_mobs2
 	./build/bench_mobs2
 
+# Table 5 of the manuscript: 10 runs per parameter set and thread count (Linux, taskset)
+bench-mt: all
+	THREADS="$${THREADS:-1 2}" bench/run_bench_10_threads.sh bench/results/bench-$$(hostname)-$$(date +%F).log
+
 clean:
 	rm -rf build
 
-.PHONY: all check check-full bench clean
+.PHONY: all check check-full bench bench-mt clean

@@ -52,6 +52,34 @@ static void bounded(cs_t *cs, lc_t *out, uint64_t v, uint64_t bound, unsigned nb
   if (cs->has_wit && v > bound) cs->bad = 1;
 }
 
+/* Test hook for the (O8a) range gadget on one coefficient. Builds the gadget for the
+ * given z (as a dishonest prover would, without the witness-side clamp) and returns
+ * the number of violated constraints: 0 iff |z| < gamma1 - beta. With upper = 0 the
+ * upper check is left out, which shows that bit decomposition alone is not enough. */
+size_t mobs_test_zrange(int64_t z, int upper) {
+  const int64_t G1B = GAMMA1 - BETA;
+  const uint64_t zbound = 2 * (uint64_t)(G1B - 1);
+  const unsigned ZB = bitlen(zbound);
+  int64_t zz = z + (G1B - 1);
+  uint64_t v = zz < 0 ? (uint64_t)zz & ((1ULL << ZB) - 1) : (uint64_t)zz; /* best bit pattern */
+  cs_t cs;
+  cs_init(&cs, 1);
+  lc_t zl, up;
+  alloc_bits_lc(&cs, &zl, v & ((1ULL << ZB) - 1), ZB);
+  if (upper) {
+    lc_const(&up, (fe)zbound);
+    lc_addc(&up, &zl, fe_neg(1));
+    g_bits(&cs, &up, zbound - (v & ((1ULL << ZB) - 1)), ZB, NULL);
+  }
+  /* the z wire must equal the claimed z */
+  lc_addk(&zl, fe_neg((fe)(G1B - 1)));
+  lc_addk(&zl, fe_neg(fe_from_i64(z)));
+  cs_lin(&cs, &zl);
+  size_t viol = cs_check(&cs, 0);
+  cs_free(&cs);
+  return viol;
+}
+
 /* ---------------- SampleInBall_B as a circuit (Lemma 6) ---------------- */
 static void sampleinball_circuit(cs_t *cs, lc_t *cout, const lc_t *ctb) {
   const int has = cs->has_wit;

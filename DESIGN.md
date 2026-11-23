@@ -1,9 +1,10 @@
 # MOBS[ML-DSA] — design and security notes
 
 This document specifies exactly what the code computes and why the parameters
-give the claimed security. It follows the manuscript
-`MOBS-main-06-11-2026-v2.tex` (Sect. 5–6: base scheme `B[Sig,Com]`, module
-`M[B,NIZK]`, opening relation (O1)–(O8)).
+give the claimed security. It follows the manuscript submitted to
+Computer Standards & Interfaces (`MOBS-CSI-23-11-2026-v2`): Sect. 3 (base scheme
+`B[Sig,Com]`, module `M[B,NIZK]`), Sect. 4.4 (opening relation (O1)–(O8)),
+Sect. 4.5 and Appendix A (Ligero/BCS, zero knowledge and OSE).
 
 ```
 Π = M[ B[ML-DSA, Com_SHAKE256], NIZK_Ligero ]
@@ -45,8 +46,9 @@ ML-DSA-44/65, `B = 2` for ML-DSA-87; see §3.4). The base signature is
 **Verify(pk, n, D, y_D, ctx, τ)** — `Ligero.Verify(R_open, x, τ, ℓ)`.
 
 The statement is bound into Fiat–Shamir through
-`dg = cSHAKE256("mode n" ‖ pk ‖ (b_i ‖ [y_i if b_i])_{i≤n}, 512, S = "MOBS-v1/stmt")`,
-where `b_i = [i ∈ D]`; `dg` and `ctx` are absorbed (length-prefixed) into the
+`dg = cSHAKE256("MOBS" ‖ ps ‖ n ‖ 0x00 ‖ pk ‖ (b_i ‖ [y_i if b_i])_{i≤n}, 512, S = "MOBS-v1/stmt")`,
+where `ps` is one byte (2, 3 or 5), `n` two bytes little-endian, and `b_i = [i ∈ D]`
+one byte (`stmt_digest` in `src/mobs.c`); `dg` and `ctx` are absorbed (length-prefixed) into the
 transcript before the commitment root.
 
 ### Domain separation (manuscript, "Labelled NIZK in the ROM")
@@ -125,7 +127,9 @@ an honest FIPS 204 signature satisfies all constraints; the in-circuit
 SampleInBall equals the reference `poly_challenge`; the verifier-side
 (witness-free) circuit has exactly the prover's structure; and a wrong disclosed
 value, a wrong public key, a forged hidden attribute and a corrupted `z` each
-violate a constraint. End-to-end negative cases (wrong context, wrong `D`,
+violate a constraint. The (O8a) gadget is also tested at the boundary:
+`z = ±(γ₁−β−1)` is accepted, `z = ±(γ₁−β)` is rejected, and without the upper
+check `z = γ₁−β` would be accepted (`mobs_test_zrange`). End-to-end negative cases (wrong context, wrong `D`,
 tampered proof, …) are in `tests/test_mobs.c`.
 
 ### 2.3 Sizes (`n = 8`, opening every other position)
@@ -139,7 +143,7 @@ tampered proof, …) are in `tests/test_mobs.c`.
 | committed rows (`RT`) | 416 | 476 | 609 |
 
 Keccak accounts for 83–88 % of the multiplications. The permutation counts match
-Table 2 of the manuscript; only (O2) grows with `n` (1 permutation per 136
+Table 4 of the manuscript; only (O2) grows with `n` (1 permutation per 136
 bytes of `DS_com ‖ r ‖ m`).
 
 ## 3. The NIZK: Ligero + BCS (`src/ligero.c`)
@@ -147,9 +151,9 @@ bytes of `DS_com ‖ r ‖ m`).
 ### 3.1 Encoding
 
 Rows have `K = 2^14` slots: `ℓ = K − t_pad` witness slots and `t_pad ≥ t`
-random padding slots. Witness slots hold, in order, the F-wires and Z-wires
-(`[F | Z]`), then the left inputs `X`, then the right inputs `Y` of all
-multiplications. A row is the unique polynomial of degree `< K` with those
+random padding slots. Witness slots hold the F-wires, the Z-wires, the left
+inputs `X` and the right inputs `Y` of all multiplications; each group starts on a
+new row, so `RT = ⌈F/ℓ⌉ + 3⌈Z/ℓ⌉ +` (number of masking rows). A row is the unique polynomial of degree `< K` with those
 values on `H = ⟨ω_K⟩`; its codeword is its evaluation on the coset
 `L = 7·⟨ω_n⟩`, `n = 4K` (Reed–Solomon, rate 1/4, `L ∩ H = ∅` since 7 generates
 `F_p^*`). Masking rows:
@@ -180,27 +184,28 @@ leaves; leaf `j` is `cSHAKE256(salt_j ‖ column_j)` with a fresh `HB`-byte salt
 
 ### 3.3 Parameters and soundness
 
-`lg_params_level(λ)` (`K = 2^14`, rate 1/4, `d = n − K + 1`, `e = ⌊(d−1)/4⌋`):
+`lg_params_level(λ)` (`K = 2^14`, rate 1/4, `n = 2^16`, `d = n − K + 1`, `e = ⌊(d−1)/4⌋ = 12288`).
+The error terms are those of Table A.2 and Lemmas A.6–A.7 of the manuscript:
 
 | | λ = 128 (ML-DSA-44) | λ = 192 (ML-DSA-65) | λ = 256 (ML-DSA-87) |
 |---|---|---|---|
 | opened columns `t` | 428 | 641 | 855 |
-| column-query error `(1 − e/n)^t` | 2^−128.2 | 2^−192.0 | 2^−256.1 |
+| `ε₂ = (1 − (e+1)/n)^t` (column query) | 2^−128.2 | 2^−192.0 | 2^−256.1 |
 | `t_pad` (≥ t) | 512 | 768 | 1024 |
-| interleaved reps `s_I`, error `((e+1)/p)^{s_I}` | 3, 2^−151 | 4, 2^−201 | 6, 2^−302 |
-| linear / quadratic reps `s_L = s_Q`, error `p^{−s}` each | 2, 2^−128 | 3, 2^−192 | 4, 2^−256 |
+| reps `s_I / s_L / s_Q` | 3 / 2 / 2 | 4 / 3 / 3 | 6 / 4 / 4 |
+| `((e+1)/(p−1))^{s_I}` | 2^−151.2 | 2^−201.7 | 2^−302.5 |
+| `ε₁ = max{((e+1)/(p−1))^{s_I}, e·p^{−s_I} + p^{−min(s_L,s_Q)}}` | ≈ 2^−128.0 | ≈ 2^−192.0 | ≈ 2^−256.0 |
+| `ε_rbr = max(ε₁, ε₂)` | ≤ 2^−127.9 | ≤ 2^−191.9 | ≤ 2^−255.9 |
 | Merkle digest / salt `HB` | 32 B | 48 B | 64 B |
 
-* `t` is set by the dominant column term. For the linear and quadratic tests a
-  wrong polynomial agrees with the opened data on at most `e + 2K − 2` of the
-  `n` columns, i.e. per-column pass probability `≤ 0.69 < 1 − e/n ≈ 0.81`.
-* `e < d/4`, as required by the interleaved-test lemma of AHIV17.
-* Round-by-round soundness of the BCS-compiled argument is about `2^−λ+1` per
-  round, plus `O(Q²/2^{8·HB})` for Merkle collisions; an attacker making `Q`
-  oracle queries succeeds with probability `≲ Q · 2^−λ+1` (grinding). The
-  digest length `HB = 2λ` bits keeps collision resistance at `λ` bits for every
-  level (an earlier version used 32 bytes for all levels, which capped
-  ML-DSA-65/87 at 128 bits).
+* In all three sets `ε₁` is set by `p^{−min(s_L,s_Q)}`, not by the column term.
+* `e < d/4` and `2e < d'` (`d' = 32770`), as needed by Lemma A.6.
+* `ε_rbr` is a success probability per Fiat–Shamir query in the classical ROM:
+  an adversary with `q_RO` queries breaks OSE with probability at most
+  `q_RO·ε_rbr + 3(q_RO + 3n·q_s)²/2^{2λ}` (Proposition 7). It is not a security
+  level in the sense of the NIST categories. Known QROM bounds for BCS give only
+  about λ/2 bits; for about 128 bits against quantum adversaries with ML-DSA-44,
+  use `lg_params_level(256)` (6.48 MiB, 1.7–2.1 times slower).
 * All challenges are sampled from the cSHAKE256 transcript by rejection
   (field elements) or masking (column indices, `n` is a power of two).
 
@@ -229,23 +234,18 @@ abort this way, which it can do anyway; it learns nothing about `m`.
 
 ### 3.5 Online extraction and non-malleability
 
-The OMUF-MO theorem needs *online simulation-extractability* (OSE). For
-BCS-type arguments this is obtained by straight-line extraction from the
-adversary's oracle queries: from an accepting proof with root `ρ`, the
-extractor follows the `MOBS-Ligero-v1/node` queries down to the
-`MOBS-Ligero-v1/leaf` queries, recovers (all but a few) columns, decodes each
-row within distance `e`, and reads off the witness. Simulated proofs for other
-`(x, ℓ)` do not help, because `x` and `ℓ` are absorbed before the root and the
-proof is uniquely determined by `(root, polynomials)` up to Merkle collisions.
-This is the standard argument (BCS16; see Chiesa–Fenzi, TCC 2024, for a formal
-treatment of straight-line extraction for Micali/BCS-style SNARKs in the ROM).
-A full written proof of OSE for this exact instantiation, with masking rows
-and three tests, is not part of this deliverable.
+The OMUF-MO theorem needs *online simulation-extractability* (OSE, Definition 2
+of the manuscript). Proposition 7 and Appendix A of the manuscript prove zero
+knowledge and OSE for exactly this proof system (masking rows, three tests,
+salted Merkle tree) in the classical ROM. The extractor follows the
+`MOBS-Ligero-v1/node` queries down to the `MOBS-Ligero-v1/leaf` queries, decodes
+every committed row and reads off the witness; simulated proofs for other
+`(x, ℓ)` do not help, because `x` and `ℓ` are absorbed before the root.
 
 **QROM.** Soundness of the BCS transform is known in the QROM
-(Chiesa–Manohar–Spooner, TCC 2019); online extraction in the QROM, which the
-manuscript would need for a fully post-quantum OMUF-MO proof, is open
-(manuscript, Sect. 9).
+(Chiesa–Manohar–Spooner, TCC 2019). Online simulation-extractability of this
+proof system in the QROM is not proven; the security bounds of the manuscript
+hold in the classical ROM.
 
 ## 4. Proof format (`MOBSLG02`)
 
@@ -275,10 +275,12 @@ for ML-DSA-44, `n = 8`: 1.44 MB of polynomials + 1.66 MB of columns = 2.96 MiB.
   a device trusted against local side channels. The verifier handles public
   data only.
 * **Randomness:** `randombytes()` from the reference code (`getrandom` on Linux).
-* **Resources:** peak memory ≈ 0.76 GiB (ML-DSA-44), 0.79 GiB (65), 1.04 GiB (87);
-  single-threaded. Row encoding (NTTs), leaf hashing and the three tests are
-  embarrassingly parallel.
-* **Proof size.** 2.9–7.6 MiB is 3–8× larger than optimized hash-based systems
+* **Resources:** peak memory with one thread 0.74 / 0.77 / 1.02 GiB (Xeon, Linux)
+  and 0.81 / 0.91 / 1.13 GiB (Apple M2, macOS) for ML-DSA-44 / 65 / 87.
+* **Threads:** OpenMP over row encoding, leaf hashing, Merkle levels and the
+  three tests (prover) and the linear test (verifier); the proof format does not
+  depend on the number of threads. `make OPENMP=0` gives a single-threaded build.
+* **Proof size.** 2.96–7.61 MiB is 3–8 times larger than optimized hash-based systems
   for a similar relation (GordieHowe: 549 KiB for the ML-DSA-44 signature
   sub-relation; blind ML-DSA signatures of BB26: ≈ 1 MB). The circuit layer is
   proof-system-agnostic (R1CS-equivalent), so it can be exported to such systems.

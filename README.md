@@ -1,7 +1,7 @@
 # MOBS[ML-DSA] — cài đặt tham chiếu bằng C
 
-Cài đặt đầy đủ lược đồ **MOBS (Modular-Opening Blind Signatures)** theo bản thảo
-`MOBS-main-06-11-2026-v2.tex`, với:
+Cài đặt đầy đủ lược đồ **MOBS (Modular-Opening Blind Signatures)** theo bản thảo gửi
+Computer Standards & Interfaces (`MOBS-CSI-23-11-2026-v2`), với:
 
 * **Người ký dùng ML-DSA (FIPS 204) nguyên bản**: ký mù 2 lượt, người ký chỉ nhận
   một chuỗi 32/48/64 byte `C = SHAKE256(DS_com‖r‖m)` và trả về đúng một chữ ký
@@ -10,8 +10,10 @@ Cài đặt đầy đủ lược đồ **MOBS (Modular-Opening Blind Signatures)
   `D` nào** của `m`, bao nhiêu lần cũng được, gắn với ngữ cảnh `ctx`; các lần mở
   không liên kết được với nhau và với phiên ký.
 * **NIZK: Ligero** (AHIV17) trên trường Goldilocks, biến thành không tương tác
-  bằng biến đổi BCS/Fiat–Shamir với cSHAKE256 — chỉ dựa trên hàm băm, hậu lượng
-  tử, không cần trusted setup. Quan hệ chứng minh là (O1)–(O8) của bản thảo.
+  bằng biến đổi BCS/Fiat–Shamir với cSHAKE256 — chỉ dựa trên hàm băm, không cần
+  trusted setup. Quan hệ chứng minh là (O1)–(O8) của bản thảo. Các cận an toàn
+  được chứng minh trong **ROM cổ điển** (Phụ lục A của bản thảo); chưa có chứng
+  minh trong QROM.
 
 Ngôn ngữ: **C (C11/gnu11)** — cùng ngôn ngữ với bản cài đặt tham chiếu chính thức
 của ML-DSA (pq-crystals/dilithium, nộp cho NIST) và các thư viện đang dùng rộng rãi
@@ -27,12 +29,13 @@ string; hash KAT của cả ba mức khớp `SHA256SUMS` công bố).
 
 Định lý của bản thảo cần một NIZK có nhãn (labelled) trong ROM với
 **zero-knowledge** (cho blindness và multi-show unlinkability) và **online
-simulation-extractability** (cho OMUF-MO), và — để giữ tính hậu lượng tử của
-MOBS[ML-DSA] — không dựa trên giả thiết nào ngoài hàm băm và chính ML-DSA.
+simulation-extractability** (cho OMUF-MO), và không dựa trên giả thiết nào ngoài hàm băm và chính ML-DSA (các giả thiết
+này được cho là đứng vững trước máy tính lượng tử).
+Cột "Trích xuất trực tuyến" dưới đây nói về ROM cổ điển.
 
-| Ứng viên | Hậu lượng tử / không setup | Trích xuất trực tuyến | Phù hợp với quan hệ (~85 % là Keccak) | Độ phức tạp cài đặt | Kích thước chứng minh |
+| Ứng viên | Chỉ dựa trên hàm băm / không setup | Trích xuất trực tuyến | Phù hợp với quan hệ (~85 % là Keccak) | Độ phức tạp cài đặt | Kích thước chứng minh |
 |---|---|---|---|---|---|
-| **Ligero + BCS** (chọn) | có / có (chỉ hash) | có, từ truy vấn Merkle (straight-line) | tốt: mạch R1CS tổng quát trên trường 64 bit | thấp: RS code + NTT + Merkle | lớn (vài MiB) |
+| **Ligero + BCS** (chọn) | có / có | có, từ truy vấn Merkle (straight-line); chứng minh ở Phụ lục A của bản thảo | tốt: mạch R1CS tổng quát trên trường 64 bit | thấp: RS code + NTT + Merkle | lớn (vài MiB) |
 | VOLE-in-the-head (FAEST-style) | có / có | khả thi (qua truy vấn RO) | rất tốt cho mạch nhị phân | trung bình–cao | nhỏ hơn |
 | Sumcheck/GKR + Ligero (Longfellow-zk) | có / có | khả thi (qua truy vấn RO) | tốt, cần mạch phân tầng | cao | nhỏ hơn |
 | STARK/FRI (AIR) | có / có | khả thi (qua truy vấn RO) | phải viết lại thành AIR | cao | nhỏ (succinct) |
@@ -69,8 +72,9 @@ DESIGN.md              đặc tả byte-level, thiết kế mạch, tham số & 
 
 ## 3. Biên dịch và kiểm thử
 
-Yêu cầu: GCC hoặc Clang 64-bit (cần `__int128`), `make`, `libm`. Đã kiểm thử trên
-Ubuntu 24.04, GCC 13.3, x86-64. Trên Windows nên dùng WSL2 (MSVC không hỗ trợ
+Yêu cầu: GCC hoặc Clang 64-bit (cần `__int128`), `make`, `libm`, OpenMP (mặc định
+`OPENMP=1`; `make OPENMP=0` cho bản một luồng). Đã kiểm thử trên Ubuntu 24.04,
+GCC 13.3, x86-64 và macOS 26.2, Homebrew GCC 16.2, Apple M2. Trên Windows nên dùng WSL2 (MSVC không hỗ trợ
 `__int128`).
 
 ```sh
@@ -82,12 +86,13 @@ make check-full   # end-to-end với tham số thật, ML-DSA-44 (~1 phút)
 ./build/bench_mobs2 4 8 16 32 64           # benchmark theo n
 ```
 
-Kết quả hiện tại: toàn bộ `make check` (110 kiểm tra) và các bài kiểm thử với
+Kết quả hiện tại: toàn bộ `make check` và các bài kiểm thử với
 tham số thật cho cả ba mức đều qua; build với AddressSanitizer + UBSan sạch.
 
 Các kiểm tra quan trọng: mạch SHAKE256 khớp `fips202.c`; SampleInBall trong mạch
 khớp `poly_challenge`; chữ ký FIPS 204 thật thỏa mạch; giá trị mở sai, khóa công
-khai sai, thuộc tính ẩn bị giả mạo, chữ ký hỏng → vi phạm ràng buộc; chứng minh bị
+khai sai, thuộc tính ẩn bị giả mạo, chữ ký hỏng → vi phạm ràng buộc; kiểm tra
+khoảng (O8a) đúng tại biên: `z = ±(γ₁−β−1)` được nhận, `z = ±(γ₁−β)` bị từ chối; chứng minh bị
 sửa bất kỳ byte nào, sai nhãn `ctx`, sai tập `D`, sai `pk` → bị từ chối; mở toàn
 bộ `D=[n]` và mở rỗng `D=∅` đều hoạt động.
 
@@ -120,189 +125,92 @@ Giá trị trả về: `0` là thành công. `mobs_user2` trả `-1` nếu chữ
 `SampleInBall` của chữ ký vượt số khối cho phép (xác suất ≤ 2^−140 với người ký
 trung thực). `ctx` nên chứa định danh bên kiểm tra và nonce để chống phát lại.
 
+Tên trong API và trong bản thảo: `rho1` = `msg1` (= `C`), `rho2` = `msg2` (chữ ký
+FIPS 204), `tau` = opening `θ`.
+
 Kích thước thông điệp ký: `rho1` = 32/48/64 byte; `rho2` = 2420/3309/4627 byte
 (chữ ký FIPS 204); `pk` = 1312/1952/2592 byte.
 
-## 5. Kết quả đo
+## 5. Kết quả đo (số liệu dùng trong bản thảo)
 
-### 5.1. Đo lại ngày 11-11-2026 (số liệu dùng trong bản thảo `MOBS-main-11-11-2026-v1`)
+Mọi số trong Bảng 5–6 của bản thảo lấy từ các log dưới đây; lệnh chạy lại ở
+`REPRODUCE.md`. Cấu hình: n = 8, mở một nửa số vị trí, 10 lần chạy cho mỗi bộ
+tham số và mỗi số luồng; trung bình ± độ lệch chuẩn (`bench/stats_threads.py`).
 
-Máy: 1 nhân Intel Xeon @ 2,10 GHz (máy ảo, ghim nhân bằng `taskset -c 0`), GCC 13.3
-`-O2`, một luồng. Mỗi bộ tham số chạy 10 lần với n = 8, mở một nửa số vị trí
-(`bench/run_bench_10.sh`); số liệu là trung bình ± độ lệch chuẩn (`bench/stats.py`).
-Nhật ký gốc: `bench/results/bench-2026-11-11.log`.
-
-| | ML-DSA-44 | ML-DSA-65 | ML-DSA-87 |
-|---|---|---|---|
-| KeyGen (ms) | 0,085 ± 0,007 | 0,165 ± 0,031 | 0,239 ± 0,005 |
-| User₁ (ms) | 0,002 | 0,002 | 0,002 |
-| Sign, FIPS 204 (ms) | 0,35 ± 0,03 | 0,63 ± 0,14 | 0,71 ± 0,04 |
-| User₂ (ms) | 0,087 ± 0,002 | 0,154 ± 0,017 | 0,253 ± 0,008 |
-| Open (s) | 13,06 ± 0,19 | 19,04 ± 0,22 | 30,84 ± 0,65 |
-| Verify (s) | 7,62 ± 0,18 | 12,88 ± 0,21 | 21,95 ± 0,42 |
-| kích thước opening `τ` | 2,96 MiB | 4,83 MiB | 7,61 MiB |
-
-Độ lệch chuẩn tương đối của Open/Verify không quá 2,4 %. Số ràng buộc và kích thước
-opening là tất định và trùng với lần đo trước.
-
-### 5.2. Đo trên Apple M4 (11-11-2026)
-
-> Ghi chú 15-11-2026: máy Mac mini của tác giả là Apple M2 (16 GB, macOS 26.2). Trên máy ảo Linux của máy này, cùng mã nguồn cho Open 8,45 s và Verify 4,85 s (ML-DSA-44), chậm hơn số dưới đây khoảng 16 %; số đo mới ở mục 5.4 (máy ảo) và 5.5 (chạy trực tiếp trên macOS, số dùng trong bản thảo).
-
-Máy: 1 nhân của máy ảo Linux (aarch64, 4 vCPU) chạy trên Mac dùng chip Apple
-M4-series, ghim nhân bằng `taskset -c 0`, GCC `-O2`. Cùng quy trình như 5.1;
-nhật ký gốc: `bench/results/bench-2026-11-11-apple.log`.
+* **Xeon**: máy ảo Ubuntu 24.04, 2 vCPU "Intel Xeon Processor @ 2.10 GHz",
+  GCC 13.3 `-O2 -fopenmp`; chạy một luồng thì ghim nhân bằng `taskset -c 0`.
+  Log: `bench/results/bench-xeon-2026-11-15.log`, `bench/results/bb26-xeon-2026-11-15.log`.
+* **Apple M2**: Mac mini M2 (4 nhân hiệu năng cao + 4 nhân tiết kiệm điện, 16 GB),
+  macOS 26.2, chạy trực tiếp, Homebrew GCC 16.2 `-O2 -fopenmp`; macOS không cho
+  ghim nhân. Log: `bench/results/bench-m2-macos-2026-11-15.log`,
+  `bench/results/bb26-m2-2026-11-15.log`.
 
 | | ML-DSA-44 | ML-DSA-65 | ML-DSA-87 |
 |---|---|---|---|
-| KeyGen (ms) | 0,041 ± 0,001 | 0,079 ± 0,001 | 0,120 ± 0,009 |
-| User₁ (ms) | 0,001 | 0,001 | 0,001 |
-| Sign, FIPS 204 (ms) | 0,20 ± 0,02 | 0,31 ± 0,02 | 0,39 ± 0,02 |
-| User₂ (ms) | 0,047 ± 0,001 | 0,075 ± 0,001 | 0,123 ± 0,002 |
-| Open (s) | 7,15 ± 0,10 | 10,67 ± 0,06 | 17,15 ± 0,11 |
-| Verify (s) | 4,08 ± 0,05 | 7,15 ± 0,04 | 12,34 ± 0,08 |
+| KeyGen, Xeon / M2 (ms) | 0.10 / 0.047 | 0.18 / 0.088 | 0.25 / 0.129 |
+| User₁, Xeon / M2 (ms) | 0.002 / 0.002 | 0.002 / 0.002 | 0.002 / 0.002 |
+| Sign (FIPS 204), Xeon / M2 (ms) | 0.39 / 0.22 | 0.59 / 0.37 | 0.79 / 0.43 |
+| User₂, Xeon / M2 (ms) | 0.10 / 0.052 | 0.14 / 0.085 | 0.29 / 0.138 |
+| Open, Xeon, 1 luồng (s) | 12.09 ± 0.55 | 18.84 ± 0.26 | 29.79 ± 0.92 |
+| Open, Xeon, 2 luồng (s) | 6.96 ± 0.33 | 10.69 ± 0.29 | 16.74 ± 0.60 |
+| Open, M2, 1 luồng (s) | 3.53 ± 0.03 | 5.00 ± 0.01 | 7.70 ± 0.02 |
+| Open, M2, 4 luồng (s) | 1.41 ± 0.01 | 1.98 ± 0.00 | 3.06 ± 0.06 |
+| Verify, Xeon, 1 luồng (s) | 7.22 ± 0.38 | 12.67 ± 0.61 | 21.58 ± 0.95 |
+| Verify, Xeon, 2 luồng (s) | 4.49 ± 0.17 | 7.92 ± 0.35 | 13.48 ± 0.35 |
+| Verify, M2, 1 luồng (s) | 2.07 ± 0.03 | 3.65 ± 0.00 | 6.34 ± 0.03 |
+| Verify, M2, 4 luồng (s) | 1.15 ± 0.00 | 2.06 ± 0.00 | 3.66 ± 0.03 |
+| Bộ nhớ đỉnh, 1 luồng, Xeon / M2 | 0.74 / 0.81 GiB | 0.77 / 0.91 GiB | 1.02 / 1.13 GiB |
+| Kích thước opening `τ` | 2.96 MiB | 4.83 MiB | 7.61 MiB |
 
-Độ lệch chuẩn tương đối của Open/Verify không quá 1,4 %. BB26 đo trên Apple M3 Pro
-(macOS, Rust); vì vậy số liệu ở mục này là số nên dùng khi so sánh với BB26.
+Thời gian phát hành (KeyGen, User₁, Sign, User₂) là số chạy một luồng, trung bình
+200 lần lặp trong mỗi lần chạy. Số ràng buộc và kích thước opening là tất định.
 
-### 5.4. Đo đa luồng và so sánh với [BB26] trên cùng máy (15-11-2026)
+**So sánh với [BB26] trên cùng máy** (ML-DSA-44, cấu hình Bảng 4 của [BB26],
+Rust 1.97, `bench/bb26/oneshot.rs`, thống kê bằng `bench/bb26/bb26_stats.awk`):
 
-Bản OpenMP: `make` (mặc định `OPENMP=1`; dùng `make OPENMP=0` nếu trình biên dịch không hỗ trợ OpenMP).
-Số luồng đặt bằng `OMP_NUM_THREADS`. Script: `bench/run_bench_10_threads.sh` (10 lần cho mỗi bộ tham số
-và số luồng, n = 8; một luồng thì ghim nhân 0 bằng `taskset`), thống kê: `bench/stats_threads.py`.
-
-* **Xeon**: máy ảo Ubuntu 24.04, 2 vCPU, CPU báo là "Intel Xeon Processor @ 2.10GHz", GCC 13.3 `-O2 -fopenmp`.
-  Nhật ký: `bench/results/bench-xeon-2026-11-15.log`.
-* **Apple M2**: máy ảo Ubuntu 22.04 (aarch64, 4 vCPU, 3 GiB) trên Mac mini M2 (16 GB, macOS 26.2), GCC 11.4 `-O2 -fopenmp`.
-  Nhật ký: `bench/results/bench-m2-2026-11-15.log`. Số Apple M2 trong bản thảo nay lấy từ lần chạy trực tiếp trên macOS (mục 5.5).
-
-| Xeon | ML-DSA-44 | ML-DSA-65 | ML-DSA-87 |
-|---|---|---|---|
-| Open, 1 luồng (s) | 12,09 ± 0,55 | 18,84 ± 0,26 | 29,79 ± 0,92 |
-| Open, 2 luồng (s) | 6,96 ± 0,33 | 10,69 ± 0,29 | 16,74 ± 0,60 |
-| Verify, 1 luồng (s) | 7,22 ± 0,38 | 12,67 ± 0,61 | 21,58 ± 0,95 |
-| Verify, 2 luồng (s) | 4,49 ± 0,17 | 7,92 ± 0,35 | 13,48 ± 0,35 |
-| Bộ nhớ đỉnh, 1 luồng | 0,74 GiB | 0,77 GiB | 1,02 GiB |
-
-| Apple M2 | ML-DSA-44 | ML-DSA-65 | ML-DSA-87 |
-|---|---|---|---|
-| Open, 1 luồng (s) | 8,47 ± 0,06 | 12,77 ± 0,09 | 20,30 ± 0,27 |
-| Open, 4 luồng (s) | 2,86 ± 0,01 | 4,18 ± 0,01 | 6,64 ± 0,09 |
-| Verify, 1 luồng (s) | 4,88 ± 0,05 | 8,58 ± 0,04 | 14,65 ± 0,14 |
-| Verify, 4 luồng (s) | 2,11 ± 0,01 | 3,74 ± 0,01 | 6,45 ± 0,04 |
-
-**[BB26] trên cùng máy Xeon.** Mã của [BB26] (`blind_mldsa` + bản fork `swanky`, cấu hình của Bảng 4 trong bài:
-`ThreeBits`, `Fwd3`, `GeneralORAM` với 213 vòng, `Crt`, `ExponentCheck`), Rust 1.97, các thiết lập build của họ
-(`target-cpu=native`, LTO). Chương trình đo: `bench/bb26/oneshot.rs` (đặt vào `blind_mldsa/examples/`, chạy
-`cargo run --release --example oneshot 10 masked`). Nhật ký: `bench/results/bb26-xeon-2026-11-15.log`.
-
-| [BB26], Xeon | Sign₁ (commit) | Prove | Verify | Proof |
+| [BB26] | Sign₁ | Prove | Verify | Proof |
 |---|---|---|---|---|
-| Masked, 1 luồng (10 lần) | 832 ± 76 ms | 1102 ± 98 ms | 998 ± 132 ms | 1 011 909 B |
-| Masked, 2 luồng (10 lần) | 806 ± 107 ms | 939 ± 92 ms | 785 ± 58 ms | 1 011 909 B |
-| Hashed, 1 luồng (5 lần) | ≈ 0 | 1948 ± 105 ms | 1053 ± 70 ms | 1 037 509 B |
-| Hashed, 2 luồng (5 lần) | ≈ 0 | 1775 ± 162 ms | 819 ± 34 ms | 1 037 509 B |
+| M2, 1 luồng | 241 ms | 897 ms | 545 ms | 1 011 909 B |
+| M2, 4 luồng | 235 ms | 896 ms | 542 ms | 1 011 909 B |
+| M2, chế độ Hashed, 1 luồng | ≈ 0 | 1167 ms | 558 ms | 1 037 509 B |
+| Xeon, 1 luồng | 832 ms | 1102 ms | 998 ms | 1 011 909 B |
+| Xeon, 2 luồng | 806 ms | 939 ms | 785 ms | 1 011 909 B |
 
-### 5.5. Chạy trực tiếp trên macOS, Apple M2, và so sánh với [BB26] trên cùng máy (15-11-2026)
+### Các lần đo cũ (không dùng trong bản thảo)
 
-Máy: Mac mini M2 (4 nhân hiệu năng cao + 4 nhân tiết kiệm điện, 16 GB), macOS 26.2 (25C56), Homebrew GCC 16.2
-`-O2 -fopenmp`, không `-march`. macOS không cho ghim tiến trình vào một nhân, nên lần chạy một luồng không ghim.
-Script: `bench/run_bench_10_macos.sh` (10 lần cho mỗi bộ tham số và số luồng, n = 8, cộng một lần đo bộ nhớ đỉnh
-bằng `/usr/bin/time -l`); thống kê: `bench/stats_threads.py` và `bench/mobs_mem.awk`.
-Nhật ký: `bench/results/bench-m2-macos-2026-11-15.log`.
+* `bench/results/bench-2026-11-11.log`: Xeon, bản một luồng trước khi có OpenMP.
+* `bench/results/bench-2026-11-11-apple.log`: máy ảo Linux aarch64 trên một máy
+  Apple khác mà bản README trước ghi là "M4-series"; không tái lập được trên
+  Mac mini M2 ở trên.
+* `bench/results/bench-m2-2026-11-15.log`: máy ảo Linux aarch64 (4 vCPU, 3 GiB,
+  GCC 11.4) trên chính Mac mini M2 ở trên; chậm hơn khoảng 2,4 lần so với chạy
+  trực tiếp trên macOS.
 
-```sh
-brew install gcc
-GCC=$(ls /opt/homebrew/bin/gcc-[0-9]* | tail -1)
-make clean && make -j8 CC="$GCC" && make check CC="$GCC"
-LOG=bench/results/bench-m2-macos-$(date +%F).log
-caffeinate -i env THREADS="1 4" CC="$GCC" bench/run_bench_10_macos.sh "$LOG"
-python3 bench/stats_threads.py "$LOG"; awk -f bench/mobs_mem.awk "$LOG"
-```
+## 6. Tham số an toàn (chi tiết ở `DESIGN.md` §3.3)
 
-| Apple M2, macOS | ML-DSA-44 | ML-DSA-65 | ML-DSA-87 |
-|---|---|---|---|
-| KeyGen (ms) | 0,047 | 0,088 | 0,129 |
-| User₁ (ms) | 0,002 | 0,002 | 0,002 |
-| Sign, FIPS 204 (ms) | 0,22 ± 0,01 | 0,37 ± 0,02 | 0,43 ± 0,01 |
-| User₂ (ms) | 0,052 | 0,085 | 0,138 |
-| Open, 1 luồng (s) | 3,53 ± 0,03 | 5,00 ± 0,01 | 7,70 ± 0,02 |
-| Open, 4 luồng (s) | 1,41 ± 0,01 | 1,98 ± 0,00 | 3,06 ± 0,06 |
-| Verify, 1 luồng (s) | 2,07 ± 0,03 | 3,65 ± 0,00 | 6,34 ± 0,03 |
-| Verify, 4 luồng (s) | 1,15 ± 0,00 | 2,06 ± 0,00 | 3,66 ± 0,03 |
-| Bộ nhớ đỉnh, 1 luồng | 0,81 GiB | 0,91 GiB | 1,13 GiB |
+Mặc định λ của NIZK bằng λ của bộ ML-DSA (128/192/256): K = 2^14 ô mỗi hàng, mã
+Reed–Solomon tốc độ 1/4 trên n = 2^16 cột, `t` = 428 / 641 / 855 cột mở, padding
+`t_pad` = 512 / 768 / 1024, lặp s_I/s_L/s_Q = 3/2/2, 4/3/3, 6/4/4, digest và salt
+Merkle 2λ bit. Khi đó `ε_rbr ≤ 2^−127.9 / 2^−191.9 / 2^−255.9`: đây là xác suất
+thành công cho mỗi truy vấn Fiat–Shamir trong ROM cổ điển, không phải mức an toàn
+theo danh mục NIST. Trong QROM các cận đã biết chỉ cho khoảng λ/2 bit; muốn nhắm
+khoảng 128 bit trước kẻ tấn công lượng tử với ML-DSA-44 thì dùng
+`mobs_set_ligero_params(lg_params_level(256))` (opening 6.48 MiB, chậm hơn 1.7–2.1 lần).
+`lg_params_test()` chỉ dùng cho kiểm thử.
 
-Độ lệch chuẩn tương đối của Open/Verify không quá 2,0 %. Bốn luồng nhanh hơn một luồng khoảng 2,5 lần (Open) và
-1,8 lần (Verify). Cùng mã nguồn trong máy ảo Linux của chính máy này (GCC 11.4, mục 5.4) chậm hơn khoảng 2,4 lần;
-chúng tôi chưa tách được phần do phiên bản trình biên dịch và phần do ảo hóa.
+## 7. Ánh xạ với bản thảo (CSI, bản 23-11-2026 v2)
 
-**[BB26] trên cùng máy M2 (macOS).** Cấu hình như mục 5.4, Rust stable 1.97 (`RUSTUP_TOOLCHAIN=stable`), các
-thiết lập build của họ (`target-cpu=native`, `aes_armv8`). Thống kê: `bench/bb26/bb26_stats.awk`.
-Nhật ký: `bench/results/bb26-m2-2026-11-15.log`.
-
-| [BB26], Apple M2 | Sign₁ (commit) | Prove | Verify | Proof |
-|---|---|---|---|---|
-| Masked, 1 luồng (10 lần) | 241 ± 11 ms | 897 ± 6 ms | 545 ± 1 ms | 1 011 909 B |
-| Masked, 4 luồng (10 lần) | 235 ± 1 ms | 896 ± 3 ms | 542 ± 2 ms | 1 011 909 B |
-| Hashed, 1 luồng (10 lần) | ≈ 0 | 1167 ± 3 ms | 558 ± 3 ms | 1 037 509 B |
-
-Với một luồng, opening của MOBS (ML-DSA-44) mất 3,53 s để tạo và 2,07 s để kiểm tra, khoảng 3,9 và 3,8 lần lâu
-hơn chứng minh của [BB26]; với bốn luồng là 1,41 s và 1,15 s, khoảng 1,6 và 2,1 lần (mã [BB26] không nhanh hơn
-khi tăng số luồng trong cấu hình này). Trên máy Xeon (mục 5.4) tỉ lệ là khoảng 11 và 7 lần.
-
-### 5.3. Lần đo trước (06-11-2026, một lần chạy cho mỗi cấu hình)
-
-Máy: 1 nhân Intel Xeon @ 2,30 GHz (máy ảo), GCC 13.3 `-O2`, một luồng.
-
-**Ký mù (ML-DSA-44, n = 8):** KeyGen 0,067 ms · User₁ 0,001 ms ·
-Sign (FIPS 204) 0,26 ms · User₂ 0,072 ms.
-
-**Mở/kiểm tra theo mức an toàn (n = 8, mở một nửa số vị trí):**
-
-| | ML-DSA-44 (λ=128) | ML-DSA-65 (λ=192) | ML-DSA-87 (λ=256) |
-|---|---|---|---|
-| Keccak-f trong mạch | 12 | 13 | 16 |
-| phép nhân / ràng buộc tuyến tính | 1,99 M / 0,58 M | 2,25 M / 0,64 M | 2,82 M / 0,79 M |
-| kích thước opening `τ` | 2,96 MiB | 4,83 MiB | 7,61 MiB |
-| Open (dựng mạch + chứng minh) | 0,3 + 9,7 s | 0,5 + 14,5 s | 0,6 + 23,6 s |
-| Verify (dựng mạch + kiểm tra) | 0,4 + 5,5 s | 0,4 + 9,8 s | 0,5 + 16,6 s |
-| bộ nhớ đỉnh | 0,76 GiB | 0,79 GiB | 1,04 GiB |
-
-**Theo số thuộc tính n (ML-DSA-44, lần đo 06-11-2026):**
-
-| n | Keccak-f | phép nhân | `τ` | Open | Verify |
-|---|---|---|---|---|---|
-| 4 | 11 | 1,84 M | 2,86 MiB | 9,6 s | 5,4 s |
-| 8 | 12 | 1,99 M | 2,96 MiB | 10,0 s | 5,9 s |
-| 16 | 14 | 2,29 M | 3,15 MiB | 11,7 s | 6,9 s |
-| 32 | 17 | 2,73 M | 3,46 MiB | 14,4 s | 8,1 s |
-| 64 | 25 | 3,92 M | 4,24 MiB | 19,8 s | 11,0 s |
-
-Số Keccak-f khớp Bảng 2 của bản thảo. So sánh: GordieHowe chứng minh riêng phần chữ
-ký ML-DSA-44 với 549 KiB; chữ ký mù trên ML-DSA nguyên bản của BB26 ≈ 1 MB. Bản này
-lớn hơn 3–8 lần và chậm hơn do dùng Ligero thuần, một luồng, chưa tối ưu
-(hướng cải thiện: song song hóa, Merkle multi-proof, lớp sumcheck cho Keccak).
-
-## 6. Tham số an toàn (chi tiết ở `DESIGN.md` §3)
-
-Mặc định mức λ của NIZK khớp mức NIST của ML-DSA: K = 2^14 ô mỗi hàng, tốc độ mã
-1/4, `t` cột mở sao cho `(1 − e/n)^t ≤ 2^−λ` (t = 428 / 641 / 855), padding
-ngẫu nhiên `t_pad ≥ t` (512 / 768 / 1024) cho ZK, lặp kiểm tra s_I/s_L/s_Q =
-3/2/2, 4/3/3, 6/4/4; digest và salt Merkle 2λ bit (32/48/64 byte). Có thể đổi
-bằng `mobs_set_ligero_params()`; `lg_params_test()` chỉ dùng cho kiểm thử.
-
-## 7. Ánh xạ với bản thảo
-
-| Bản thảo (v2) | Mã nguồn |
+| Bản thảo | Mã nguồn |
 |---|---|
-| Base scheme `B[Sig,Com]`, Com = SHAKE256(DS_com‖r‖m) | `mobs_user1`, `mobs_sign`, `mobs_user2` (`src/mobs.c`) |
-| Module `M[B,NIZK]`: Open/Verify, nhãn = ctx | `mobs_open`, `mobs_verify`, `stmt_digest` |
-| (O1) mở `m_D = y` | `mldsa_circuit.c`, khối "(O1)" |
+| Lược đồ cơ sở `B[Sig,Com]`, Com = SHAKE256(DS_com‖r‖m) (Mục 3) | `mobs_user1`, `mobs_sign`, `mobs_user2` (`src/mobs.c`) |
+| Mô-đun `M[B,NIZK]`: Open/Verify, nhãn = ctx (Mục 3) | `mobs_open`, `mobs_verify`, `stmt_digest` |
+| Statement digest (Mục 4.3) | `stmt_digest`: "MOBS" ‖ ps ‖ n ‖ 0x00 ‖ pk ‖ (b_i ‖ y_i) |
+| (O1) mở `m_D = y` (Mục 4.4) | `mldsa_circuit.c`, khối "(O1)" |
 | (O2) cam kết, (O3) `μ`, (O7) `c̃` | Keccak circuit, khối "(O2)", "(O3)", "(O7)" |
 | (O4) SampleInBall_B | `sampleinball_circuit` |
 | (O5) `Az − c t₁ 2^d`, (O6) UseHint/Decompose | khối "(O5)+(O6)" |
-| (O8) chuẩn của `z`, trọng số của `h` | khối "(O8a)", "(O8b)" |
-| NIZK có nhãn trong ROM, domain separation | `ligero.c`, `xof.c` (cSHAKE256) |
+| (O8) chuẩn của `z` (phân tích bit + kiểm tra cận trên), trọng số của `h` | khối "(O8a)", "(O8b)"; `bounded()` |
+| Ligero/BCS, ZK và OSE (Mục 4.5, Phụ lục A) | `ligero.c`, `xof.c` (cSHAKE256) |
 
 ## 8. Giới hạn
 
@@ -310,8 +218,8 @@ bằng `mobs_set_ligero_params()`; `lg_params_test()` chỉ dùng cho kiểm th�
 * Chưa có vị từ Φ(m) (ví dụ chứng minh tuổi ≥ 18 mà không mở năm sinh); gadget
   phân tích bit đã có sẵn để bổ sung.
 * Mỗi thuộc tính 32 byte; tối đa 256 thuộc tính (`MOBS_MAX_ATTRS`).
-* OSE của Ligero/BCS dựa trên lập luận trích xuất straight-line chuẩn trong ROM;
-  chứng minh hình thức cho đúng biến thể này và trường hợp QROM còn mở
+* ZK và OSE của đúng biến thể Ligero/BCS này được chứng minh trong ROM cổ điển
+  (Mệnh đề 7 và Phụ lục A của bản thảo). Chưa có chứng minh trong QROM
   (`DESIGN.md` §3.5).
 * Mã của dự án dùng giấy phép MIT (xem `LICENSE`); `third_party/dilithium` giữ
   giấy phép gốc (CC0 hoặc Apache-2.0).
